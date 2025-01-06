@@ -16,21 +16,16 @@
         }
 
         #game-container {
-            border: 1px solid #ccc;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            background-color: #fff;
-        }
-
-        .board {
             display: grid;
-            grid-template-columns: repeat(8, 50px); /* Responsive cell size */
-            grid-template-rows: repeat(8, 50px);
-            border-collapse: collapse;
+            grid-template-columns: repeat(6, 1fr); /* Adjust for grid size */
+            grid-gap: 2px;
+            border: 2px solid black;
+            background-color: #ddd;
         }
 
         .cell {
-            width: 100%;
-            height: 100%;
+            width: 50px; /* Adjust cell size for responsiveness*/
+            height: 50px;
             border: 1px solid #ccc;
             display: flex;
             justify-content: center;
@@ -39,82 +34,73 @@
             cursor: pointer;
             user-select: none; /* Prevent text selection */
         }
-
-        .cell:nth-child(even):nth-child(4n+1), /* Checkerboard pattern */
-        .cell:nth-child(odd):nth-child(4n+3) {
-            background-color: #eee;
+        .cell.marked{
+            background-color: lightgray;
         }
-        .queen{
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E");
+        .cell.queen{
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor' class='w-6 h-6'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
         }
-        #message{
-            text-align: center;
-            padding: 1rem;
-        }
-        @media (max-width: 400px) {
-            .board {
-                grid-template-columns: repeat(8, 30px);
-                grid-template-rows: repeat(8, 30px);
-            }
-        }
+
+        /* Example color styling (improve as needed) */
+        .color1 { background-color: #f0d0d0; }
+        .color2 { background-color: #d0f0d0; }
+        .color3 { background-color: #d0d0f0; }
+        .color4 { background-color: #f0f0d0; }
+        .color5 { background-color: #d0f0f0; }
+        .color6 { background-color: #f0d0f0; }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="message">Place the queens.</div>
-        <div class="board" id="board"></div>
-    </div>
+
+    <div id="game-container"></div>
 
     <script>
-        const board = document.getElementById('board');
-        const message = document.getElementById('message');
-        let queensPlaced = 0;
-        let queenPositions = [];
+        const container = document.getElementById('game-container');
+        const gridSize = 6;
+        const colors = [ "color1", "color2", "color3", "color4", "color5", "color6"];
+        let board = [];
 
         function createBoard() {
-            for (let i = 0; i < 64; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.dataset.row = Math.floor(i / 8);
-                cell.dataset.col = i % 8;
-                cell.addEventListener('click', handleCellClick);
-                board.appendChild(cell);
+            board = [];
+            for (let i = 0; i < gridSize; i++) {
+                board[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.dataset.state = "empty"
+                    cell.classList.add(colors[Math.floor(i/2)*3 + Math.floor(j/2)]);
+                    cell.addEventListener('click', handleCellClick);
+                    container.appendChild(cell);
+                    board[i][j] = cell;
+                }
             }
         }
 
         function handleCellClick(event) {
             const cell = event.target;
-            const row = parseInt(cell.dataset.row);
-            const col = parseInt(cell.dataset.col);
+            let state = cell.dataset.state;
 
-            if (isSafe(row, col)) {
-                cell.classList.add('queen');
-                queensPlaced++;
-                queenPositions.push({row, col});
-                if (queensPlaced === 8) {
-                    message.textContent = "You Win!";
-                } else {
-                    message.textContent = `Queens placed: ${queensPlaced}`;
-                }
-                cell.removeEventListener('click', handleCellClick); // Prevent re-clicking
+            if (state == "empty"){
+                cell.dataset.state = "queen";
+                cell.classList.add("queen");
+            } else if (state == "queen"){
+                cell.dataset.state = "marked";
+                cell.classList.remove("queen");
+                cell.classList.add("marked");
             } else {
-                message.textContent = "Invalid move.";
+                cell.dataset.state = "empty";
+                cell.classList.remove("marked");
             }
-        }
-
-        function isSafe(row, col) {
-            for (const queen of queenPositions) {
-                if (queen.row === row || queen.col === col || Math.abs(queen.row - row) === Math.abs(queen.col - col)) {
-                    return false;
-                }
-            }
-            return true;
         }
 
         createBoard();
+
     </script>
+
 </body>
 </html>
