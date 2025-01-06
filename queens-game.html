@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queens Game</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #game-container {
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px); /* Responsive cell size */
+            grid-template-rows: repeat(8, 50px);
+            border-collapse: collapse;
+        }
+
+        .cell {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            user-select: none; /* Prevent text selection */
+        }
+
+        .cell:nth-child(even):nth-child(4n+1), /* Checkerboard pattern */
+        .cell:nth-child(odd):nth-child(4n+3) {
+            background-color: #eee;
+        }
+        .queen{
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000000'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+        #message{
+            text-align: center;
+            padding: 1rem;
+        }
+        @media (max-width: 400px) {
+            .board {
+                grid-template-columns: repeat(8, 30px);
+                grid-template-rows: repeat(8, 30px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="message">Place the queens.</div>
+        <div class="board" id="board"></div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const message = document.getElementById('message');
+        let queensPlaced = 0;
+        let queenPositions = [];
+
+        function createBoard() {
+            for (let i = 0; i < 64; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row = Math.floor(i / 8);
+                cell.dataset.col = i % 8;
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+
+            if (isSafe(row, col)) {
+                cell.classList.add('queen');
+                queensPlaced++;
+                queenPositions.push({row, col});
+                if (queensPlaced === 8) {
+                    message.textContent = "You Win!";
+                } else {
+                    message.textContent = `Queens placed: ${queensPlaced}`;
+                }
+                cell.removeEventListener('click', handleCellClick); // Prevent re-clicking
+            } else {
+                message.textContent = "Invalid move.";
+            }
+        }
+
+        function isSafe(row, col) {
+            for (const queen of queenPositions) {
+                if (queen.row === row || queen.col === col || Math.abs(queen.row - row) === Math.abs(queen.col - col)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
